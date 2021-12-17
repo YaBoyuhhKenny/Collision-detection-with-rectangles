@@ -38,14 +38,15 @@ namespace Collision_detection_with_rectangles
         {
             // TODO: Add your initialization logic here
 
+            
+
+            base.Initialize();
             pacSpeed = 3;
             pacRect = new Rectangle(10, 10, 60, 60);
             barrierRect1 = new Rectangle(0, 250, 350, 75);
             barrierRect2 = new Rectangle(450, 250, 350, 75);
-            coinRect = new Rectangle(400, 50, coinTexture.Width, coinTexture.Height);
             exitRect = new Rectangle(700, 380, 100, 100);
-
-            base.Initialize();
+            coinRect = new Rectangle(400, 50, coinTexture.Width, coinTexture.Height);
         }
 
         protected override void LoadContent()
@@ -69,6 +70,10 @@ namespace Collision_detection_with_rectangles
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            keyboardState = Keyboard.GetState(); 
+
+            if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.Left) || keyboardState.IsKeyDown(Keys.Right) || keyboardState.IsKeyDown(Keys.Right) != true)
+                currentPacTexture = pacSleepTexture;
 
             if (keyboardState.IsKeyDown(Keys.Left))
             {
@@ -89,6 +94,11 @@ namespace Collision_detection_with_rectangles
             {
                 pacRect.Y += pacSpeed;
                 currentPacTexture = pacDownTexture;
+            }
+
+            if (pacRect.Intersects(coinRect))
+            {
+                coinRect.Location = new Point(800, 480);
             }
 
             // TODO: Add your update logic here
