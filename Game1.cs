@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Collision_detection_with_rectangles
 {
@@ -24,7 +25,7 @@ namespace Collision_detection_with_rectangles
         Texture2D barrierTexture;
         Rectangle barrierRect1, barrierRect2;
         Texture2D coinTexture;
-        Rectangle coinRect;
+        List<Rectangle> coins;
         int pacSpeed;
 
         public Game1()
@@ -46,7 +47,11 @@ namespace Collision_detection_with_rectangles
             barrierRect1 = new Rectangle(0, 250, 350, 75);
             barrierRect2 = new Rectangle(450, 250, 350, 75);
             exitRect = new Rectangle(700, 380, 100, 100);
-            coinRect = new Rectangle(400, 50, coinTexture.Width, coinTexture.Height);
+            coins = new List<Rectangle>();
+            coins.Add(new Rectangle(400, 50, coinTexture.Width, coinTexture.Height));
+            coins.Add(new Rectangle(475, 50, coinTexture.Width, coinTexture.Height));
+            coins.Add(new Rectangle(200, 300, coinTexture.Width, coinTexture.Height));
+            coins.Add(new Rectangle(400, 300, coinTexture.Width, coinTexture.Height));
         }
 
         protected override void LoadContent()
@@ -70,7 +75,8 @@ namespace Collision_detection_with_rectangles
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            keyboardState = Keyboard.GetState(); 
+            keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
 
             if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.Left) || keyboardState.IsKeyDown(Keys.Right) || keyboardState.IsKeyDown(Keys.Right) != true)
                 currentPacTexture = pacSleepTexture;
@@ -79,27 +85,70 @@ namespace Collision_detection_with_rectangles
             {
                 pacRect.X -= pacSpeed;
                 currentPacTexture = pacLeftTexture;
+                if (pacRect.Intersects(barrierRect1))
+                {
+                    pacRect.X = barrierRect1.Right;
+                }
+                if (pacRect.Intersects(barrierRect2))
+                {
+                    pacRect.X = barrierRect2.Left;
+                }
             }
             if (keyboardState.IsKeyDown(Keys.Right))
             {
                 pacRect.X += pacSpeed;
                 currentPacTexture = pacRightTexture;
+                if (pacRect.Intersects(barrierRect1))
+                {
+                    pacRect.X = barrierRect1.Left - pacRect.Width;  
+                }
+                if (pacRect.Intersects(barrierRect2))
+                {
+                    pacRect.X = barrierRect2.Left - pacRect.Width;
+                }
             }
+            
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 pacRect.Y -= pacSpeed;
                 currentPacTexture = pacUpTexture;
-            }
+                if (pacRect.Intersects(barrierRect1))
+                {
+                    pacRect.Y = barrierRect1.Bottom;
+                }
+                if (pacRect.Intersects(barrierRect2))
+                {
+                    pacRect.Y = barrierRect2.Bottom;
+                }
+            }   
             if (keyboardState.IsKeyDown(Keys.Down))
             {
                 pacRect.Y += pacSpeed;
                 currentPacTexture = pacDownTexture;
+                if (pacRect.Intersects(barrierRect1))
+                {
+                    pacRect.Y = barrierRect1.Top - pacRect.Height;
+                }
+                if (pacRect.Intersects(barrierRect2))
+                {
+                    pacRect.Y = barrierRect2.Top - pacRect.Height;
+                }
+            }
+            
+
+            for (int i = 0; i < coins.Count; i++)
+            {
+                if (pacRect.Intersects(coins[i]))
+                {
+                    coins.RemoveAt(i);
+                    i--;
+                }
             }
 
-            if (pacRect.Intersects(coinRect))
-            {
-                coinRect.Location = new Point(800, 480);
-            }
+            if (exitRect.Contains(pacRect))
+                Exit();
+            
+
 
             // TODO: Add your update logic here
 
@@ -118,7 +167,8 @@ namespace Collision_detection_with_rectangles
             _spriteBatch.Draw(barrierTexture, barrierRect2, Color.White);
             _spriteBatch.Draw(exitTexture, exitRect, Color.White);
             _spriteBatch.Draw(currentPacTexture, pacRect, Color.White);
-            _spriteBatch.Draw(coinTexture, coinRect, Color.White);
+            foreach (Rectangle coin in coins)
+                _spriteBatch.Draw(coinTexture, coin, Color.White);
 
             _spriteBatch.End();
 
