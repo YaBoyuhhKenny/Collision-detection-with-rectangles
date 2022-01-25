@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
@@ -12,7 +13,11 @@ namespace Collision_detection_with_rectangles
 
         KeyboardState keyboardState;
         MouseState mouseState;
-        
+
+        SoundEffect coinPickup;
+        SoundEffectInstance coinPickupInstance;
+        Texture2D cherryTexture;
+        Rectangle cherryRect;
         Texture2D pacLeftTexture;
         Texture2D pacRightTexture;
         Texture2D pacUpTexture;
@@ -53,11 +58,13 @@ namespace Collision_detection_with_rectangles
             coins.Add(new Rectangle(475, 50, coinTexture.Width, coinTexture.Height));
             coins.Add(new Rectangle(200, 340, coinTexture.Width, coinTexture.Height));
             coins.Add(new Rectangle(400, 300, coinTexture.Width, coinTexture.Height));
+            cherryRect = new Rectangle(375, 275, 50, 50);
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
 
             pacDownTexture = Content.Load<Texture2D>("pacDown");
             pacUpTexture = Content.Load<Texture2D>("pacUp");
@@ -67,6 +74,9 @@ namespace Collision_detection_with_rectangles
             barrierTexture = Content.Load<Texture2D>("rock_barrier");
             exitTexture = Content.Load<Texture2D>("hobbit_door");
             coinTexture = Content.Load<Texture2D>("coin");
+            cherryTexture = Content.Load<Texture2D>("Cherry");
+            coinPickup = Content.Load<SoundEffect>("Coin Sound");
+            coinPickupInstance = coinPickup.CreateInstance();
             currentPacTexture = pacSleepTexture;
 
             // TODO: use this.Content to load your game content here
@@ -148,6 +158,7 @@ namespace Collision_detection_with_rectangles
                 {
                     coins.RemoveAt(i);
                     i--;
+                    coinPickupInstance.Play();
                 }
             }
 
@@ -158,9 +169,12 @@ namespace Collision_detection_with_rectangles
                         Exit();
             }
 
-            
 
-            
+            if (pacRect.Intersects(cherryRect))
+            { 
+                pacSpeed = 6;
+                cherryRect = new Rectangle(0, 0, 0, 0);
+            }
 
             // TODO: Add your update logic here
 
@@ -181,7 +195,7 @@ namespace Collision_detection_with_rectangles
             _spriteBatch.Draw(currentPacTexture, pacRect, Color.White);
             foreach (Rectangle coin in coins)
                 _spriteBatch.Draw(coinTexture, coin, Color.White);
-
+            _spriteBatch.Draw(cherryTexture, cherryRect, Color.White);
             _spriteBatch.End();
 
             base.Draw(gameTime);
